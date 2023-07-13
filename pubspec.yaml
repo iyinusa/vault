@@ -17,6 +17,7 @@ dependencies:
   get_storage: ^2.1.1
   http: ^0.13.6
   shimmer: ^3.0.0
+  seerbit_flutter: ^0.0.4+6
 
 dev_dependencies:
   flutter_test:

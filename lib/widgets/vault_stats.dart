@@ -80,19 +80,19 @@ class _VaultStatsState extends State<VaultStats> {
             ],
           ),
 
-          const SizedBox(height: 10),
-
           // add fund button
           TextButton.icon(
             onPressed: () {
-              showBottomSheet(
+              showModalBottomSheet(
                 context: context,
-                enableDrag: true,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(10),
                 ),
+                isScrollControlled: true,
                 builder: (context) {
-                  return const FundOptions();
+                  return StatefulBuilder(builder: (context, setState) {
+                    return const FundOptions();
+                  });
                 },
               );
             },

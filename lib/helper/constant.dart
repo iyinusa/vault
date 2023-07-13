@@ -14,10 +14,14 @@ const Color successColor = Color(0xFF036001);
 const Color failedColor = Color(0xFFAF0000);
 
 //// API SECTION ///////
-const String base = 'https://solvsai.com/api/';
+const String base = 'https://seerbitapi.com/api/v2/';
 const String pubKey = 'SBPUBK_DQ24K6T5TI1WOAOYPWWYMGMHKDRVEGPW';
 final apiHeaders = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
   'Authorization': 'Bearer $pubKey'
 };
+
+//// STORED KEYS //////
+const virtualAccountRef = 'virtualAccountRef';
+const vaultTransactions = 'vaultTransactions';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vault/helper/constant.dart';
 
 import 'helper/utils.dart';
+import 'widgets/fund_options.dart';
 import 'widgets/vault_stats.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,7 +20,14 @@ class _HomeScreenState extends State<HomeScreen> {
   late double _outlow = 0;
 
   bool isLoading = false;
-  List transactions = [];
+  List transactions = [
+    {
+      'ref': 'Title 1',
+      'type': 'Simple Checkout',
+      'date': '2023-07-03',
+      'amount': 5000
+    }
+  ];
 
   @override
   Widget build(BuildContext context) {
