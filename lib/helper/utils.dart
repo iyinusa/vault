@@ -1,11 +1,13 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../widgets/page_loading.dart';
 import '../widgets/shimmer.dart';
 import 'api.dart';
 import 'constant.dart';
@@ -19,6 +21,8 @@ import 'constant.dart';
 /// - Success Notification
 /// - Failed Notification
 /// - No Content
+/// - Processing
+/// - Generate Random Character
 /////////////////////////////////////////////////////////////////
 
 class Utils {
@@ -142,6 +146,28 @@ class Utils {
             style: const TextStyle(color: darkGreyColor),
           ),
         ],
+      ),
+    );
+  }
+
+  // processing
+  processing(context) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const PageLoading(),
+    );
+  }
+
+  // generate random character
+  random(int length) {
+    const chars =
+        'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    Random rand = Random();
+    return String.fromCharCodes(
+      Iterable.generate(
+        length,
+        (_) => chars.codeUnitAt(rand.nextInt(chars.length)),
       ),
     );
   }

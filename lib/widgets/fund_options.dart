@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:vault/widgets/button.dart';
 import 'package:vault/widgets/input.dart';
 
 import '../helper/constant.dart';
+import '../helper/seerbit.dart';
 import '../helper/utils.dart';
 
 class FundOptions extends StatefulWidget {
@@ -13,17 +15,64 @@ class FundOptions extends StatefulWidget {
 }
 
 class _FundOptionsState extends State<FundOptions> {
+  final store = GetStorage();
   final utils = Utils();
+  final seerbit = SeerBitPay();
 
   final _fullNameC = TextEditingController();
   final _emailC = TextEditingController();
   final _bvnC = TextEditingController();
 
-  bool isVirtualAccount = false;
-  late String _bank = '9PAYMENT SERVICE BANK';
-  late String _accNumber = '1234567890';
+  final _amountC = TextEditingController();
 
-  _selectOption(type) async {}
+  bool isVirtualAccount = false;
+  late String _bank = '';
+  late String _accNumber = '';
+
+  // select integration option
+  _payOption(context, type) async {
+    // Simple Checkout
+    if (type == 'simple_checkout') {
+      String fullName = 'Kennedy Yinusa';
+      String email = 'iyinusa@yahoo.co.uk';
+      String amount = _amountC.text.trim();
+      seerbit.simpleCheckout(context, fullName, email, amount);
+    }
+
+    // Virtual Account
+    if (type == 'virtual_account') {
+      utils.processing(context);
+
+      seerbit.creatVirtualAccount({
+        'publicKey': pubKey,
+        'fullName': _fullNameC.text.trim(),
+        'email': _emailC.text.trim(),
+        'bankVerificationNumber': _bvnC.text.trim(),
+        'currency': 'NGN',
+        'country': 'NG',
+        'reference': utils.random(10),
+      }).then((resp) {
+        Navigator.of(context).pop();
+
+        if (resp != null) {
+          // save virtual account reference on device for
+          // future virtual account retrieval
+          final ref = resp['payments']['reference'];
+          store.write(virtualAccountRef, ref);
+
+          setState(() {
+            _bank = resp['payments']['bankName'];
+            _accNumber = resp['payments']['accountNumber'];
+          });
+
+          Navigator.of(context).pop();
+        }
+      });
+    }
+  }
+
+  // get virtual account
+  _getVirtualAccount() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +107,7 @@ class _FundOptionsState extends State<FundOptions> {
             !isVirtualAccount
                 ? TextButton(
                     onPressed: () {
-                      _sheet(_virtualAccountForm(screen));
+                      _sheet(context, _virtualAccountForm(screen));
                     },
                     child: const Text('CREATE VIRTUAL ACCOUNT'),
                   )
@@ -115,13 +164,13 @@ class _FundOptionsState extends State<FundOptions> {
             _optionList(
               name: 'Simple Checkout',
               onTap: () {
-                _selectOption('simple_heckout');
+                _sheet(context, _simpleCheckout(screen));
               },
             ),
             _optionList(
               name: 'Standard Checkout',
               onTap: () {
-                _selectOption('standard_heckout');
+                _payOption(context, 'standard_checkout');
               },
             ),
           ],
@@ -141,6 +190,43 @@ class _FundOptionsState extends State<FundOptions> {
         ),
         title: Text(name),
         trailing: const Icon(Icons.arrow_forward_outlined),
+      ),
+    );
+  }
+
+  // simple checkout
+  _simpleCheckout(screen) {
+    return Container(
+      width: screen.width,
+      height: screen.height * 0.25,
+      padding: const EdgeInsets.all(25),
+      child: Column(
+        children: [
+          const Text('Provide amount to be funded'),
+          const SizedBox(height: 15),
+          const Divider(),
+          const SizedBox(height: 15),
+          Row(
+            children: [
+              SizedBox(
+                width: screen.width * 0.45,
+                child: TextInput(
+                  controller: _amountC,
+                  label: '5000',
+                  inputType: TextInputType.number,
+                ),
+              ),
+              const Spacer(),
+              SizedBox(
+                width: screen.width * 0.40,
+                child: FullRoundedButton(
+                  onPressed: () => _payOption(context, 'simple_checkout'),
+                  text: 'Make Payment',
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -184,7 +270,7 @@ class _FundOptionsState extends State<FundOptions> {
           ),
           const SizedBox(height: 15),
           FullRoundedButton(
-            onPressed: () {},
+            onPressed: () => _payOption(context, 'virtual_account'),
             text: 'Create Virtual Account',
           ),
         ],
@@ -193,15 +279,17 @@ class _FundOptionsState extends State<FundOptions> {
   }
 
   // show sheet
-  _sheet(screenContent) {
-    return showBottomSheet(
+  _sheet(context, screenContent) {
+    showModalBottomSheet(
       context: context,
-      enableDrag: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(10),
       ),
+      isScrollControlled: true,
       builder: (context) {
-        return screenContent;
+        return StatefulBuilder(builder: (context, setState) {
+          return screenContent;
+        });
       },
     );
   }
