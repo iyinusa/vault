@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vault/helper/constant.dart';
 
 import 'helper/utils.dart';
-import 'widgets/fund_options.dart';
+import 'logics/vault.dart';
 import 'widgets/vault_stats.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -14,20 +14,38 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final utils = Utils();
+  final myVault = MyVault();
 
   late double _balance = 0;
   late double _inflow = 0;
   late double _outlow = 0;
 
   bool isLoading = false;
-  List transactions = [
-    {
-      'ref': 'Title 1',
-      'type': 'Simple Checkout',
-      'date': '2023-07-03',
-      'amount': 5000
-    }
-  ];
+  List transactions = [];
+
+  // check data
+  _checkData() async {
+    final trans = await myVault.fetchTransaction();
+    setState(() {
+      if (trans != null) {
+        transactions = List.from(trans.reversed);
+
+        _inflow = 0;
+        _outlow = 0;
+        for (int i = 0; i < trans.length; i++) {
+          _inflow = _inflow + transactions[i]['amount'];
+        }
+
+        _balance = _inflow - _outlow;
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    _checkData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +63,12 @@ class _HomeScreenState extends State<HomeScreen> {
               inflow: _inflow,
               outflow: _outlow,
             ),
+
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text('TRANSACTIONS'),
+            ),
+            const Divider(),
 
             // transactions
             Expanded(

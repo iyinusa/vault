@@ -5,7 +5,7 @@ import 'package:get_storage/get_storage.dart';
 import 'helper/constant.dart';
 import 'home.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // initialize GetX
   await GetStorage.init();

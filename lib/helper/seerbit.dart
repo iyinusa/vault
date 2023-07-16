@@ -66,9 +66,11 @@ class SeerBitPay {
     SeerbitMethod().startPayment(context, payload: payload,
         onSuccess: (response) {
       // JSON response
-      debugPrint(response as String?);
+      print(response);
+      return response;
     }, onCancel: (e) {
       debugPrint(e);
+      return false;
     });
   }
 
