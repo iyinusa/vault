@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:vault/helper/router.dart';
+import 'package:vault/home.dart';
 import 'package:vault/widgets/button.dart';
 import 'package:vault/widgets/input.dart';
 
 import '../helper/constant.dart';
 import '../helper/seerbit.dart';
 import '../helper/utils.dart';
+import '../logics/vault.dart';
 
 class FundOptions extends StatefulWidget {
   const FundOptions({super.key});
@@ -18,6 +21,7 @@ class _FundOptionsState extends State<FundOptions> {
   final store = GetStorage();
   final utils = Utils();
   final seerbit = SeerBitPay();
+  final myVault = MyVault();
 
   final _fullNameC = TextEditingController();
   final _emailC = TextEditingController();
@@ -25,9 +29,19 @@ class _FundOptionsState extends State<FundOptions> {
 
   final _amountC = TextEditingController();
 
+  late List transactions = [];
+
   bool isVirtualAccount = false;
   late String _bank = '';
   late String _accNumber = '';
+
+  // check data
+  _checkData() async {
+    final trans = myVault.fetchTransaction();
+    setState(() {
+      if (trans != null) transactions = List.from(trans.reversed);
+    });
+  }
 
   // select integration option
   _payOption(context, type) async {
@@ -36,7 +50,27 @@ class _FundOptionsState extends State<FundOptions> {
       String fullName = 'Kennedy Yinusa';
       String email = 'iyinusa@yahoo.co.uk';
       String amount = _amountC.text.trim();
-      seerbit.simpleCheckout(context, fullName, email, amount);
+      await seerbit
+          .simpleCheckout(context, fullName, email, amount)
+          .then((resp) {
+        if (resp != null) {
+          print('============\n$resp\n===========');
+          // add fund
+          const fundType = 'Simple Checkout';
+          final fundRef = resp['payments']['reference'];
+          final fundAmount =
+              resp['payments']['amount'] - resp['payments']['fee'];
+          final fundDate = resp['payments']['transactionProcessedTime'];
+          transactions.add({
+            'ref': fundRef,
+            'type': fundType,
+            'amount': fundAmount,
+            'date': fundDate,
+          });
+          myVault.saveTransaction(transactions);
+          navTo(page: const HomeScreen());
+        }
+      });
     }
 
     // Virtual Account
@@ -73,6 +107,12 @@ class _FundOptionsState extends State<FundOptions> {
 
   // get virtual account
   _getVirtualAccount() async {}
+
+  @override
+  void initState() {
+    _checkData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
