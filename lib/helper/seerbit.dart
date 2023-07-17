@@ -72,14 +72,9 @@ class SeerBitPay {
 
       // save transactions
       final Map<String, dynamic> payments = response['payments'];
-      // Parse the string values as double
-      final double amount = payments['amount'];
-      final double fee = payments['fee'];
-      final double result = amount - fee;
       MyVault().addTransaction(
         ref: payments['paymentReference'],
         type: 'Simple Checkout',
-        amount: result,
         date: payments['transactionProcessedTime'],
       );
       navTo(page: const HomeScreen());
