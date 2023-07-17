@@ -1,4 +1,6 @@
 # Vault
  Vault is your mobile wallet using SeerBit Payments platform.
 
-![](https://github.com/iyinusa/vault/blog/main/simple_checkout.gif)
+| Simple Checkout | Standard Checkout |
+|       :---:     |      :---:        |
+| ![](https://github.com/iyinusa/vault/blob/main/simple_checkout.gif) | |
