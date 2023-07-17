@@ -3,4 +3,4 @@
 
 | Simple Checkout | Standard Checkout |
 |       :---:     |      :---:        |
-| ![](https://github.com/iyinusa/vault/blob/main/simple_checkout.gif) | |
+| <img src="/simple_checkout.gif" width="250" /> | |
