@@ -36,12 +36,7 @@ class _FundOptionsState extends State<FundOptions> {
   late String _accNumber = '';
 
   // check data
-  _checkData() async {
-    final trans = myVault.fetchTransaction();
-    setState(() {
-      if (trans != null) transactions = List.from(trans.reversed);
-    });
-  }
+  _checkData() async {}
 
   // select integration option
   _payOption(context, type) async {
@@ -50,27 +45,7 @@ class _FundOptionsState extends State<FundOptions> {
       String fullName = 'Kennedy Yinusa';
       String email = 'iyinusa@yahoo.co.uk';
       String amount = _amountC.text.trim();
-      await seerbit
-          .simpleCheckout(context, fullName, email, amount)
-          .then((resp) {
-        if (resp != null) {
-          print('============\n$resp\n===========');
-          // add fund
-          const fundType = 'Simple Checkout';
-          final fundRef = resp['payments']['reference'];
-          final fundAmount =
-              resp['payments']['amount'] - resp['payments']['fee'];
-          final fundDate = resp['payments']['transactionProcessedTime'];
-          transactions.add({
-            'ref': fundRef,
-            'type': fundType,
-            'amount': fundAmount,
-            'date': fundDate,
-          });
-          myVault.saveTransaction(transactions);
-          navTo(page: const HomeScreen());
-        }
-      });
+      await seerbit.simpleCheckout(context, fullName, email, amount);
     }
 
     // Virtual Account
