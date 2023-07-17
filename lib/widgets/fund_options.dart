@@ -45,6 +45,7 @@ class _FundOptionsState extends State<FundOptions> {
       String fullName = 'Kennedy Yinusa';
       String email = 'iyinusa@yahoo.co.uk';
       String amount = _amountC.text.trim();
+      myVault.saveAmount(amount);
       await seerbit.simpleCheckout(context, fullName, email, amount);
     }
 
