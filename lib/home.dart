@@ -64,9 +64,21 @@ class _HomeScreenState extends State<HomeScreen> {
               outflow: _outlow,
             ),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text('TRANSACTIONS'),
+            GestureDetector(
+              onTap: () {
+                final Map<String, dynamic> maps = {
+                  'code': 00,
+                  'message': 'Successful',
+                  'payments': {'amount': 10.15, 'fee': 0.15}
+                };
+                final pays = maps['payments'];
+                final amount = pays['amount'] - pays['fee'];
+                print(amount);
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Text('TRANSACTIONS'),
+              ),
             ),
             const Divider(),
 

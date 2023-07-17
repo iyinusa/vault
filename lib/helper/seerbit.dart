@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:seerbit_flutter/seerbit_flutter.dart';
+import 'package:vault/logics/vault.dart';
 
+import '../home.dart';
 import 'api.dart';
 import 'constant.dart';
+import 'router.dart';
 import 'utils.dart';
 
 class SeerBitPay {
@@ -63,11 +66,23 @@ class SeerBitPay {
       ),
     );
 
-    SeerbitMethod().startPayment(context, payload: payload,
+    await SeerbitMethod().startPayment(context, payload: payload,
         onSuccess: (response) {
-      // JSON response
-      print(response);
-      return response;
+      // debugPrint(response);
+
+      // save transactions
+      final Map<String, dynamic> payments = response['payments'];
+      // Parse the string values as double
+      final double amount = payments['amount'];
+      final double fee = payments['fee'];
+      final double result = amount - fee;
+      MyVault().addTransaction(
+        ref: payments['paymentReference'],
+        type: 'Simple Checkout',
+        amount: result,
+        date: payments['transactionProcessedTime'],
+      );
+      navTo(page: const HomeScreen());
     }, onCancel: (e) {
       debugPrint(e);
       return false;
