@@ -3,4 +3,4 @@
 
 | Simple Checkout | Standard Checkout |
 |       :---:     |      :---:        |
-| <img src="/simple-checkout.gif" style="width:40%;" /> | |
+| <img src="/simple-checkout.gif" width="40%" /> | |
