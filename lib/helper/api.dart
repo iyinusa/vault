@@ -100,4 +100,36 @@ class Api {
       }
     }
   }
+
+  /// get call
+  Future<dynamic> getCall({
+    required String endpoint,
+    required String? query,
+  }) async {
+    // get token
+    String token = await this.token();
+    if (token.isNotEmpty) {
+      final apiHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token'
+      };
+
+      if (query != '') {
+        endpoint += '?${query!}';
+      }
+
+      try {
+        var response = await http
+            .get(
+              Uri.parse(base + endpoint),
+              headers: apiHeaders,
+            )
+            .timeout(const Duration(seconds: 10));
+        return response.body;
+      } catch (e) {
+        // print(e.toString());
+      }
+    }
+  }
 }

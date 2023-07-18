@@ -16,9 +16,9 @@ const Color failedColor = Color(0xFFAF0000);
 //// API SECTION ///////
 const String base = 'https://seerbitapi.com/api/v2/';
 const String pubKey =
-    'SBPUBK_DQ24K6T5TI1WOAOYPWWYMGMHKDRVEGPW'; // please remove this in your project
-const String myPubKey = 'SBPUBK_XXXXXXXXXXXXX';
-const String mySecKey = 'SBSECK_XXXXXXXXXXXXX';
+    'SBPUBK_DQ24K6T5TI1WOAOYPWWYMGMHKDRVEGPW'; // please remove from your project
+const String myPubKey = 'SBPUBK_XXXXXXXXXX';
+const String mySecKey = 'SBSECK_XXXXXXXXXXXX';
 final apiHeaders = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',
@@ -26,6 +26,7 @@ final apiHeaders = {
 };
 
 //// STORED KEYS //////
+const paymentRef = 'paymentRef';
 const virtualAccountRef = 'virtualAccountRef';
 const virtualAccountBank = 'virtualAccountBank';
 const virtualAccountNo = 'virtualAccountNo';
