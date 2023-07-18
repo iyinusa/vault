@@ -18,6 +18,7 @@ dependencies:
   http: ^0.13.6
   shimmer: ^3.0.0
   seerbit_flutter: ^0.0.4+6
+  webview_flutter: ^3.0.4
 
 dev_dependencies:
   flutter_test:

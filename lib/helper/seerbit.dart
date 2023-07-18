@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:seerbit_flutter/seerbit_flutter.dart';
 import 'package:vault/logics/vault.dart';
@@ -84,6 +82,17 @@ class SeerBitPay {
     });
   }
 
+  /// The function performs a standard checkout by making a POST request to the 'payments' endpoint with the provided data.
+  ///
+  /// Args:
+  ///   data: The `data` parameter is the payload or data that you want to send in the request. It could be an object or a map containing the necessary information for the payment.
+  ///
+  /// Returns:
+  ///   The `standardCheckout` function is returning the result of the `api.postCall` function, which is an asynchronous call to the 'payments' endpoint with the provided data.
+  standardCheckout(data) async {
+    return await api.postCall(endpoint: 'payments/', data: data);
+  }
+
   // create virtual account
   /// The function `creatVirtualAccount` creates a virtual account by making a POST request to an API endpoint and returns the response data if the status is 'SUCCESS'.
   ///
@@ -95,5 +104,9 @@ class SeerBitPay {
   ///   either the decoded JSON data from the response if the status is 'SUCCESS', or null if there is an error or the status is not 'SUCCESS'.
   creatVirtualAccount(data) async {
     return await api.postCall(endpoint: 'virtual-accounts/', data: data);
+  }
+
+  verifyPayment(ref) async {
+    return await api.getCall(endpoint: 'payments/query/$ref', query: '');
   }
 }

@@ -6,6 +6,7 @@ import 'package:vault/helper/router.dart';
 import 'package:vault/home.dart';
 import 'package:vault/widgets/button.dart';
 import 'package:vault/widgets/input.dart';
+import 'package:vault/widgets/webview.dart';
 
 import '../helper/constant.dart';
 import '../helper/seerbit.dart';
@@ -50,6 +51,42 @@ class _FundOptionsState extends State<FundOptions> {
       String amount = _amountC.text.trim();
       myVault.saveData(fundAmount, double.parse(amount));
       await seerbit.simpleCheckout(context, fullName, email, amount);
+    }
+
+    // Standard Checkout
+    if (type == 'standard_checkout') {
+      utils.processing(context);
+      String ref = utils.random(16);
+      String email = 'iyinusa@yahoo.co.uk';
+
+      // save payment reference for after payment verification
+      myVault.saveData(paymentRef, ref);
+      myVault.saveData(fundAmount, double.parse(_amountC.text.trim()));
+
+      await seerbit.standardCheckout({
+        'publicKey': myPubKey,
+        'amount': _amountC.text.trim(),
+        'currency': 'NGN',
+        'country': 'NG',
+        'paymentReference': ref,
+        'email': email,
+        'productId': utils.random(8),
+        'productDescription': 'Funding Vault',
+        'callbackUrl': 'https://solvsai.com/',
+      }).then((resp) {
+        Navigator.of(context).pop();
+        if (resp != null) {
+          final res = jsonDecode(resp);
+          if (res['status'] == 'SUCCESS') {
+            final payLink = res['data']['payments']['redirectLink'];
+            if (payLink != null) _launchPayment(payLink);
+          } else {
+            utils.failedNotify(msg: 'Failed to initialize payment');
+          }
+        } else {
+          utils.failedNotify(msg: 'Failed to initialize payment');
+        }
+      });
     }
 
     // Virtual Account
@@ -103,6 +140,45 @@ class _FundOptionsState extends State<FundOptions> {
         isVirtualAccount = true;
         _bank = accBank;
         _accNumber = accNo;
+      });
+    }
+  }
+
+  // launch payment
+  _launchPayment(link) async {
+    var result = await showDialog(
+      context: context,
+      builder: (context) => WebViewScreen(
+        name: 'SeerBit Standard Payment',
+        url: link,
+      ),
+    );
+
+    if (result == null) _verifyPayment();
+  }
+
+  // verify payment
+  _verifyPayment() async {
+    final ref = await myVault.readData(paymentRef);
+    if (ref != null) {
+      seerbit.verifyPayment(ref).then((resp) {
+        print(resp);
+        if (resp != null) {
+          final res = jsonDecode(resp);
+          if (res['status'] == 'SUCCESS') {
+            // fund vault
+            myVault.addTransaction(
+              ref: ref,
+              type: 'Standard Checkout',
+              date: DateTime.now().toString(),
+            );
+            navTo(page: const HomeScreen());
+          } else {
+            utils.failedNotify(msg: 'Payment Failed');
+          }
+        } else {
+          utils.failedNotify(msg: 'Payment Failed');
+        }
       });
     }
   }
@@ -203,13 +279,13 @@ class _FundOptionsState extends State<FundOptions> {
             _optionList(
               name: 'Simple Checkout',
               onTap: () {
-                _sheet(context, _simpleCheckout(screen));
+                _sheet(context, _checkout(screen, 'simple_checkout'));
               },
             ),
             _optionList(
               name: 'Standard Checkout',
               onTap: () {
-                _payOption(context, 'standard_checkout');
+                _sheet(context, _checkout(screen, 'standard_checkout'));
               },
             ),
           ],
@@ -233,8 +309,8 @@ class _FundOptionsState extends State<FundOptions> {
     );
   }
 
-  // simple checkout
-  _simpleCheckout(screen) {
+  // checkout
+  _checkout(screen, type) {
     return Container(
       width: screen.width,
       height: screen.height * 0.25,
@@ -259,7 +335,12 @@ class _FundOptionsState extends State<FundOptions> {
               SizedBox(
                 width: screen.width * 0.40,
                 child: FullRoundedButton(
-                  onPressed: () => _payOption(context, 'simple_checkout'),
+                  onPressed: () => _payOption(
+                    context,
+                    type == 'simple_checkout'
+                        ? 'simple_checkout'
+                        : 'standard_checkout',
+                  ),
                   text: 'Make Payment',
                 ),
               ),
