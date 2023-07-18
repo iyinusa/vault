@@ -1,18 +1,18 @@
 import 'package:get_storage/get_storage.dart';
 
+import '../helper/constant.dart';
+
 class MyVault {
-  final savedVault = 'savedVault';
-  final fundAmount = 'fundAmount';
   final store = GetStorage();
 
-  // save fund amount
-  saveAmount(String data) {
-    store.write(fundAmount, double.parse(data));
+  // save data
+  saveData(String key, dynamic data) {
+    store.write(key, data);
   }
 
-  // read fund amount
-  readAmount() {
-    return store.read(fundAmount);
+  // read data
+  readData(key) {
+    return store.read(key);
   }
 
   // save transactions
@@ -30,7 +30,7 @@ class MyVault {
     final trans = fetchTransaction();
     if (trans != null) transactions = List.from(trans.reversed);
 
-    double amount = readAmount();
+    double amount = readData(fundAmount);
     if (amount != 0) {
       transactions.add({
         'ref': ref,

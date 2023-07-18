@@ -94,19 +94,6 @@ class SeerBitPay {
   /// Returns:
   ///   either the decoded JSON data from the response if the status is 'SUCCESS', or null if there is an error or the status is not 'SUCCESS'.
   creatVirtualAccount(data) async {
-    try {
-      await api.post(endpoint: 'virtual-accounts', data: data).then((resp) {
-        if (resp != null) {
-          final res = jsonDecode(resp);
-          if (res['status'] == 'SUCCESS') {
-            return jsonDecode(res['data']);
-          }
-        }
-      });
-    } catch (e) {
-      debugPrint('Error => $e');
-    }
-
-    return null;
+    return await api.postCall(endpoint: 'virtual-accounts/', data: data);
   }
 }

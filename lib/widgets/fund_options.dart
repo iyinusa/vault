@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:vault/helper/router.dart';
@@ -18,7 +20,6 @@ class FundOptions extends StatefulWidget {
 }
 
 class _FundOptionsState extends State<FundOptions> {
-  final store = GetStorage();
   final utils = Utils();
   final seerbit = SeerBitPay();
   final myVault = MyVault();
@@ -36,7 +37,9 @@ class _FundOptionsState extends State<FundOptions> {
   late String _accNumber = '';
 
   // check data
-  _checkData() async {}
+  _checkData() async {
+    _getVirtualAccount();
+  }
 
   // select integration option
   _payOption(context, type) async {
@@ -45,7 +48,7 @@ class _FundOptionsState extends State<FundOptions> {
       String fullName = 'Kennedy Yinusa';
       String email = 'iyinusa@yahoo.co.uk';
       String amount = _amountC.text.trim();
-      myVault.saveAmount(amount);
+      myVault.saveData(fundAmount, double.parse(amount));
       await seerbit.simpleCheckout(context, fullName, email, amount);
     }
 
@@ -54,7 +57,7 @@ class _FundOptionsState extends State<FundOptions> {
       utils.processing(context);
 
       seerbit.creatVirtualAccount({
-        'publicKey': pubKey,
+        'publicKey': myPubKey,
         'fullName': _fullNameC.text.trim(),
         'email': _emailC.text.trim(),
         'bankVerificationNumber': _bvnC.text.trim(),
@@ -63,26 +66,46 @@ class _FundOptionsState extends State<FundOptions> {
         'reference': utils.random(10),
       }).then((resp) {
         Navigator.of(context).pop();
-
         if (resp != null) {
-          // save virtual account reference on device for
-          // future virtual account retrieval
-          final ref = resp['payments']['reference'];
-          store.write(virtualAccountRef, ref);
+          final res = jsonDecode(resp);
+          if (res['status'] == 'SUCCESS') {
+            final pays = res['data']['payments'];
+            final accBank = pays['bankName'];
+            final accNo = pays['accountNumber'];
 
-          setState(() {
-            _bank = resp['payments']['bankName'];
-            _accNumber = resp['payments']['accountNumber'];
-          });
+            // save virtual account reference on device for
+            // future virtual account retrieval
+            final ref = pays['reference'];
+            myVault.saveData(virtualAccountRef, ref);
+            myVault.saveData(virtualAccountBank, accBank);
+            myVault.saveData(virtualAccountNo, accNo);
 
-          Navigator.of(context).pop();
+            setState(() {
+              _bank = accBank;
+              _accNumber = accNo;
+              isVirtualAccount = true;
+            });
+
+            Navigator.of(context).pop();
+          }
         }
       });
     }
   }
 
   // get virtual account
-  _getVirtualAccount() async {}
+  _getVirtualAccount() async {
+    final accBank = myVault.readData(virtualAccountBank);
+    final accNo = myVault.readData(virtualAccountNo);
+
+    if (accBank != null && accNo != null) {
+      setState(() {
+        isVirtualAccount = true;
+        _bank = accBank;
+        _accNumber = accNo;
+      });
+    }
+  }
 
   @override
   void initState() {
