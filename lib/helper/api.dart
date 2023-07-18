@@ -42,4 +42,62 @@ class Api {
       // print(e.toString());
     }
   }
+
+  /// get token
+  token() async {
+    final apiHeaders = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    final body = {
+      'key': '$mySecKey.$pubKey',
+    };
+
+    var response = await http
+        .post(
+          Uri.parse('${base}encrypt/keys'),
+          headers: apiHeaders,
+          body: jsonEncode(body),
+        )
+        .timeout(const Duration(seconds: 10));
+    final resp = response.body;
+    final res = jsonDecode(resp);
+    if (res['status'] != null) {
+      if (res['status'] == 'SUCCESS') {
+        return res['data']['EncryptedSecKey']['encryptedKey'];
+      }
+    }
+
+    return;
+  }
+
+  /// post call
+  Future<dynamic> postCall({
+    required String endpoint,
+    required data,
+  }) async {
+    // get token
+    String token = await this.token();
+    if (token.isNotEmpty) {
+      final apiHeaders = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token'
+      };
+
+      try {
+        var response = await http
+            .post(
+              Uri.parse(base + endpoint),
+              headers: apiHeaders,
+              body: jsonEncode(data),
+            )
+            .timeout(const Duration(seconds: 10));
+        return response.body;
+      } catch (e) {
+        // print(e.toString());
+      }
+    }
+  }
 }
