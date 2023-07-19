@@ -94,7 +94,7 @@ class SeerBitPay {
   }
 
   // create virtual account
-  /// The function `creatVirtualAccount` creates a virtual account by making a POST request to an API endpoint and returns the response data if the status is 'SUCCESS'.
+  /// The function `createVirtualAccount` creates a virtual account by making a POST request to an API endpoint and returns the response data if the status is 'SUCCESS'.
   ///
   /// Args:
   ///   data: The `data` parameter is the data that you want to send in the request body when creating a virtual account. It should be a JSON object containing the necessary information for creating the
@@ -102,8 +102,20 @@ class SeerBitPay {
   ///
   /// Returns:
   ///   either the decoded JSON data from the response if the status is 'SUCCESS', or null if there is an error or the status is not 'SUCCESS'.
-  creatVirtualAccount(data) async {
+  createVirtualAccount(data) async {
     return await api.postCall(endpoint: 'virtual-accounts/', data: data);
+  }
+
+  /// The function creates a subscription by making a POST request to the 'recurring/subscribes/' endpoint with the provided data.
+  ///
+  /// Args:
+  ///   data: The `data` parameter is an object that contains the necessary information for creating a
+  /// subscription. It could include details such as the user's name, email, payment method, subscription plan, and any other relevant information needed to set up the subscription.
+  ///
+  /// Returns:
+  ///   the result of the API post call to the 'recurring/subscribes/' endpoint with the provided data.
+  createSubscription(data) async {
+    return await api.postCall(endpoint: 'recurring/subscribes/', data: data);
   }
 
   verifyPayment(ref) async {
