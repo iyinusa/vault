@@ -5,9 +5,9 @@
 |       :---:     |      :---:        |
 | <img src="/simple-checkout.gif" width="65%" /> | <img src="/standard-checkout.gif" width="65%" /> |
 
-| Virtual Account |  |
+| Virtual Account | Subscription |
 |       :---:     |      :---:        |
-| <img src="/virtual-account.gif" width="40%" /> | |
+| <img src="/virtual-account.gif" width="40%" /> | <img src="/subscription.gif" width="40%" /> |
 
 # Test Android APK
-[<img src="/google.png" width="120px" />](https://bit.ly/3OkaWIa)
+[<img src="/google.png" width="150px" />](https://bit.ly/3OkaWIa)
