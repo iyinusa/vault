@@ -18,7 +18,7 @@ const String base = 'https://seerbitapi.com/api/v2/';
 const String pubKey =
     'SBPUBK_DQ24K6T5TI1WOAOYPWWYMGMHKDRVEGPW'; // please remove from your project
 const String myPubKey = 'SBPUBK_XXXXXXXXXX';
-const String mySecKey = 'SBSECK_XXXXXXXXXXXX';
+const String mySecKey = 'SBSECK_XXXXXXXXXXXXXX';
 final apiHeaders = {
   'Content-Type': 'application/json',
   'Accept': 'application/json',

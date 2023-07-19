@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:vault/helper/router.dart';
 import 'package:vault/home.dart';
 import 'package:vault/widgets/button.dart';
@@ -12,6 +11,8 @@ import '../helper/constant.dart';
 import '../helper/seerbit.dart';
 import '../helper/utils.dart';
 import '../logics/vault.dart';
+
+enum BillingCycles { daily, weekly, monthly, annually }
 
 class FundOptions extends StatefulWidget {
   const FundOptions({super.key});
@@ -29,7 +30,19 @@ class _FundOptionsState extends State<FundOptions> {
   final _emailC = TextEditingController();
   final _bvnC = TextEditingController();
 
+  final _cardNumberC = TextEditingController();
+  final _cardNameC = TextEditingController();
+  final _expiryMonthC = TextEditingController();
+  final _expiryYearC = TextEditingController();
+  final _cvvC = TextEditingController();
+  final _billingPeriodC = TextEditingController();
+
+  BillingCycles billingCycle = BillingCycles.daily;
+  late String _selectCycle = 'DIALY';
+
   final _amountC = TextEditingController();
+
+  bool chargeNow = true;
 
   late List transactions = [];
 
@@ -93,7 +106,7 @@ class _FundOptionsState extends State<FundOptions> {
     if (type == 'virtual_account') {
       utils.processing(context);
 
-      seerbit.creatVirtualAccount({
+      seerbit.createVirtualAccount({
         'publicKey': myPubKey,
         'fullName': _fullNameC.text.trim(),
         'email': _emailC.text.trim(),
@@ -126,6 +139,50 @@ class _FundOptionsState extends State<FundOptions> {
             Navigator.of(context).pop();
           }
         }
+      });
+    }
+
+    // Subscription
+    if (type == 'subscription') {
+      utils.processing(context);
+
+      String email = 'iyinusa@yahoo.co.uk';
+
+      seerbit.createSubscription({
+        'publicKey': myPubKey,
+        'paymentReference': utils.random(10),
+        'cardNumber': _cardNumberC.text.trim(),
+        'cardName': _cardNameC.text.trim(),
+        'expiryMonth': _expiryMonthC.text.trim(),
+        'expiryYear': _expiryYearC.text.trim(),
+        'cvv': _cvvC.text.trim(),
+        'amount': _amountC.text.trim(),
+        'email': email,
+        'currency': 'NGN',
+        'country': 'NG',
+        'productId': utils.random(10),
+        'productDescription': 'Create Subscription',
+        'startDate': DateTime.now().toString(),
+        'billingCycle': _selectCycle,
+        'billingPeriod': _billingPeriodC.text.trim(),
+        'subscriptionAmount': chargeNow,
+        'redirectUrl': 'https://solvsai.com/',
+        'callbackUrl': 'https://solvsai.com/',
+        'allowPartialDebit': 'false',
+      }).then((resp) {
+        Navigator.of(context).pop();
+        if (resp != null) {
+          final res = jsonDecode(resp);
+          if (res['status'] == 'SUCCESS') {
+            utils.successNotify(msg: 'Subscription Created');
+          } else {
+            // utils.failedNotify(msg: 'Subscription Creation Failed');
+          }
+        } else {
+          // utils.failedNotify(msg: 'Subscription Creation Failed');
+        }
+
+        navTo(page: const HomeScreen());
       });
     }
   }
@@ -162,7 +219,6 @@ class _FundOptionsState extends State<FundOptions> {
     final ref = await myVault.readData(paymentRef);
     if (ref != null) {
       seerbit.verifyPayment(ref).then((resp) {
-        print(resp);
         if (resp != null) {
           final res = jsonDecode(resp);
           if (res['status'] == 'SUCCESS') {
@@ -213,7 +269,7 @@ class _FundOptionsState extends State<FundOptions> {
 
             const SizedBox(height: 15),
             const Text(
-              'Fund your vault using any of below options',
+              'Fund your Vault using any of below options',
               style: TextStyle(color: darkGreyColor),
             ),
             const SizedBox(height: 25),
@@ -286,6 +342,23 @@ class _FundOptionsState extends State<FundOptions> {
               name: 'Standard Checkout',
               onTap: () {
                 _sheet(context, _checkout(screen, 'standard_checkout'));
+              },
+            ),
+            _optionList(
+              name: 'Subscription',
+              onTap: () {
+                showModalBottomSheet(
+                  context: context,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return StatefulBuilder(builder: (context, setState) {
+                      return _subscriptionForm(screen, setState);
+                    });
+                  },
+                );
               },
             ),
           ],
@@ -392,6 +465,202 @@ class _FundOptionsState extends State<FundOptions> {
           FullRoundedButton(
             onPressed: () => _payOption(context, 'virtual_account'),
             text: 'Create Virtual Account',
+          ),
+        ],
+      ),
+    );
+  }
+
+  // create subscription
+  _subscriptionForm(screen, setState) {
+    return Container(
+      width: screen.width,
+      height: screen.height * 0.75,
+      padding: const EdgeInsets.all(25),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Provide below details to create a subscription'),
+          const SizedBox(height: 15),
+          TextInput(
+            controller: _cardNumberC,
+            label: 'Card Number',
+            inputType: TextInputType.number,
+          ),
+          const SizedBox(height: 10),
+
+          // amount & expiry
+          Row(
+            children: [
+              SizedBox(
+                width: screen.width * 0.45,
+                child: TextInput(
+                  controller: _amountC,
+                  label: '5000',
+                  inputType: TextInputType.number,
+                ),
+              ),
+              const Spacer(),
+              SizedBox(
+                width: screen.width * 0.2,
+                child: TextInput(
+                  controller: _expiryMonthC,
+                  label: 'MM',
+                  inputType: TextInputType.number,
+                ),
+              ),
+              const Spacer(),
+              SizedBox(
+                width: screen.width * 0.2,
+                child: TextInput(
+                  controller: _expiryYearC,
+                  label: 'YY',
+                  inputType: TextInputType.number,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // name & cvv
+          Row(
+            children: [
+              SizedBox(
+                width: screen.width * 0.6,
+                child: TextInput(
+                  controller: _fullNameC,
+                  label: 'Card Name',
+                  inputType: TextInputType.text,
+                ),
+              ),
+              const Spacer(),
+              SizedBox(
+                width: screen.width * 0.25,
+                child: TextInput(
+                  controller: _cvvC,
+                  label: 'CVV',
+                  inputType: TextInputType.number,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          const Divider(),
+
+          const Text(
+            'Billing Cycle',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          // dialy and weekly
+          Row(
+            children: [
+              SizedBox(
+                width: screen.width * 0.4,
+                child: RadioListTile<BillingCycles>(
+                  value: BillingCycles.daily,
+                  groupValue: billingCycle,
+                  title: const Text(
+                    'DAILY',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  onChanged: (BillingCycles? v) {
+                    setState(() {
+                      billingCycle = v!;
+                      _selectCycle = 'DAILY';
+                    });
+                  },
+                ),
+              ),
+              SizedBox(
+                width: screen.width * 0.4,
+                child: RadioListTile<BillingCycles>(
+                  value: BillingCycles.weekly,
+                  groupValue: billingCycle,
+                  title: const Text(
+                    'WEEKLY',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  onChanged: (BillingCycles? v) {
+                    setState(() {
+                      billingCycle = v!;
+                      _selectCycle = 'WEEKLY';
+                    });
+                  },
+                ),
+              )
+            ],
+          ),
+          // monthly and yearly
+          Row(
+            children: [
+              SizedBox(
+                width: screen.width * 0.4,
+                child: RadioListTile<BillingCycles>(
+                  value: BillingCycles.monthly,
+                  groupValue: billingCycle,
+                  title: const Text(
+                    'MONTHLY',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  onChanged: (BillingCycles? v) {
+                    setState(() {
+                      billingCycle = v!;
+                      _selectCycle = 'MONTHLY';
+                    });
+                  },
+                ),
+              ),
+              SizedBox(
+                width: screen.width * 0.4,
+                child: RadioListTile<BillingCycles>(
+                  value: BillingCycles.annually,
+                  groupValue: billingCycle,
+                  title: const Text(
+                    'ANNUALLY',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  onChanged: (BillingCycles? v) {
+                    setState(() {
+                      billingCycle = v!;
+                      _selectCycle = 'ANNUALLY';
+                    });
+                  },
+                ),
+              )
+            ],
+          ),
+          const SizedBox(height: 10),
+          const Divider(),
+
+          const Text(
+            'Billing Period',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Row(
+            children: [
+              SizedBox(
+                width: screen.width * 0.2,
+                child: TextInput(
+                  controller: _billingPeriodC,
+                  label: '6',
+                  inputType: TextInputType.text,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Text(
+                  'Number of times SeerBit will do a\nrecurrent billing'),
+            ],
+          ),
+
+          const SizedBox(height: 15),
+          FullRoundedButton(
+            onPressed: () => _payOption(context, 'subscription'),
+            text: 'Create Subscription',
           ),
         ],
       ),

@@ -24,6 +24,7 @@ class MyVault {
   addTransaction({
     required String ref,
     required String type,
+    String? authorization,
     required String date,
   }) {
     List transactions = [];
@@ -36,6 +37,7 @@ class MyVault {
         'ref': ref,
         'type': type,
         'amount': amount,
+        'authorization': authorization,
         'date': date,
       });
 
